@@ -1,0 +1,34 @@
+
+services:
+  db:
+    image: mysql:8.0
+    container_name: oms_local_mysql
+    restart: unless-stopped
+    environment:
+      MYSQL_ROOT_PASSWORD: rootpass
+      MYSQL_DATABASE: order_management
+      MYSQL_USER: oms_user_yarik
+      MYSQL_PASSWORD: 1234
+    ports:
+      - "3307:3306"
+    command: --default-authentication-plugin=mysql_native_password
+    volumes:
+      - ./mysql-init:/docker-entrypoint-initdb.d:ro
+      - oms_mysql_data:/var/lib/mysql
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-u", "root", "-prootpass"]
+      interval: 10s
+      timeout: 5s
+      retries: 6
+
+  adminer:
+    image: adminer:latest
+    container_name: oms_adminer
+    restart: unless-stopped
+    ports:
+      - "8081:8080"
+    depends_on:
+      - db
+
+volumes:
+  oms_mysql_data:
